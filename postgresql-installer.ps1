@@ -1,10 +1,16 @@
-﻿#######################################
+﻿###################################################### 
+#
+# PostgreSQL-Installer-Configurator
 #
 # Elad Rotshtein
 #
-# postgreqsl-installer-configurator
-#
-#######################################
+######################################################
 
-# URL for postgresql installer
-$downloadURL = 'https://www.enterprisedb.com/postgresql-tutorial-resources-training?cid=48'
+# URL to download installer from
+$DLURL = 'https://www.enterprisedb.com/postgresql-tutorial-resources-training?cid=48'
+$DLFolder = '.'
+
+$superusername = 'aidocapp'
+
+# need to implament more securely
+$superuserpass = 
