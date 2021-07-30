@@ -4,24 +4,26 @@
 #
 ######################################################
 
-$transcript = "PostgreSQL-Installer.log"
-
 # path of key and encrypted password files
 $keyPath = 'C:\encrypted_data\key.txt'
-$PWDPath = 'C:\encrypted_data\crypt.txt'
+$pwdPath = 'C:\encrypted_data\crypt.txt'
+
+$transcript = "PostgreSQL-Installer.log"
 
 # function defenition
 
 function Install-PostgreSQL
 {
+    [CmdletBinding()]
     <#
     add comment
     #>
     param (
-        [string]$Uri = 'https://sbp.enterprisedb.com/getfile.jsp?fileid=1257713',  
-        [string]$destination = 'PostgreSQL_Installer.exe',
-        [string]$superaccount='postgres',
-        [Parameter(mandatory)][string]$superpassword
+        [string]$Uri          = 'https://sbp.enterprisedb.com/getfile.jsp?fileid=1257713',  
+        [string]$destination  = "$($env:USERPROFILE)\Desktop\PostgreSQL_Installer.exe",
+        [string]$superaccount = 'postgres',
+        [Parameter(mandatory)][string]$pwdPath,
+        [Parameter(mandatory)][string]$keyPath
     )
     
     try
@@ -33,11 +35,17 @@ function Install-PostgreSQL
     throw "Error received while attempting to download installer from $uri. Error: $($error[0])"
     }
 
-    Start-Sleep -Seconds 20
-
     try
     {
-       Start-Process $destination -ArgumentList "--mode unattended --superaccount $superaccount --superpassword $superpassword --servicepassword $superpassword" -Wait -ErrorAction Stop
+        $superpassword = Get-Content $pwdPath | ConvertTo-SecureString -Key (get-content $keyPath)
+    }
+    catch
+    {
+    throw "Error received while attempting to get and decrypt the password from $pwdPath with key from $keyPath. Error: $($error[0])"
+    }
+    try
+    {
+       Start-Process $destination -ArgumentList "--mode unattended", "--superaccount $superaccount", "--superpassword $superpassword", "--servicepassword $superpassword" -Wait -ErrorAction Stop
     }
     catch
     {
@@ -53,19 +61,9 @@ Start-Transcript -path $transcript
 
 try
 {
-
     try
     {
-    $superPassword = Get-Content $PwdPath | ConvertTo-SecureString -Key (get-content $keyPath)
-    }
-    catch
-    {
-    throw "Error received while attempting to get and decrypt the password. Error: $($error[0])"
-    }
-    
-    try
-    {
-        Install-PostgreSQL -superaccount 'aidocapp' -superpassword $superPassword
+        Install-PostgreSQL -superaccount 'aidocapp' -pwdPath $pwdPath -keyPath $keyPath
     }
     catch
     {
