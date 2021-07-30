@@ -14,8 +14,11 @@ $PWDPath = 'C:\encrypted_data\crypt.txt'
 
 function Install-PostgreSQL
 {
+    <#
+    add comment
+    #>
     param (
-        [string]$Uri = 'https://www.enterprisedb.com/postgresql-tutorial-resources-training?cid=48',  
+        [string]$Uri = 'https://sbp.enterprisedb.com/getfile.jsp?fileid=1257713',  
         [string]$destination = 'PostgreSQL_Installer.exe',
         [string]$superaccount='postgres',
         [Parameter(mandatory)][string]$superpassword
@@ -30,9 +33,11 @@ function Install-PostgreSQL
     throw "Error received while attempting to download installer from $uri. Error: $($error[0])"
     }
 
+    Start-Sleep -Seconds 20
+
     try
     {
-       Start-Process $destination -ArgumentList  "--mode unattended --unattendedmodeui none --superaccount $superaccount --superpassword $superpassword" -Wait -ErrorAction Stop
+       Start-Process $destination -ArgumentList "--mode unattended --superaccount $superaccount --superpassword $superpassword --servicepassword $superpassword" -Wait -ErrorAction Stop
     }
     catch
     {
