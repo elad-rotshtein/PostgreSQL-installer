@@ -22,7 +22,7 @@ function Install-PostgreSQL
         [string]$Uri          = 'https://sbp.enterprisedb.com/getfile.jsp?fileid=1257713',  
         [string]$destination  = "$($env:USERPROFILE)\Desktop\PostgreSQL_Installer.exe",
         [string]$superaccount = 'postgres',
-        [boolean]$noUi      = $true,
+        [boolean]$noUi        = $true,
         [Parameter(mandatory)][string]$pwdPath,
         [Parameter(mandatory)][string]$keyPath
     )
@@ -46,7 +46,7 @@ function Install-PostgreSQL
     }
     try
     {
-       Start-Process $destination -ArgumentList (@("--mode unattended", "--superaccount $superaccount", "--superpassword $superpassword", "--servicepassword $superpassword")`
+       Start-Process $destination -ArgumentList (@("--mode unattended", "--superaccount $superaccount", "--superpassword $($superpassword | ConvertFrom-SecureString -asplaintext -force) ", "--servicepassword $($superpassword | ConvertFrom-SecureString -asplaintext -force)")`
        + @("--unattendedmodeui none") * $noUi) -Wait -ErrorAction Stop
     }
     catch
