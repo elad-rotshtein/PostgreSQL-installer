@@ -46,8 +46,10 @@ function Install-PostgreSQL
     }
     try
     {
-       Start-Process $destination -ArgumentList (@("--mode unattended", "--superaccount $superaccount", "--superpassword $($superpassword | ConvertFrom-SecureString -asplaintext -force) ", "--servicepassword $($superpassword | ConvertFrom-SecureString -asplaintext -force)")`
-       + @("--unattendedmodeui none") * $noUi) -Wait -ErrorAction Stop
+        Start-Process $destination -ArgumentList (@("--mode unattended", "--superaccount $superaccount",` 
+        "--superpassword $([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($superpassword)))",`
+        "--servicepassword $([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($superpassword)))")`
+        + @("--unattendedmodeui none") * $noUi) -Wait -ErrorAction Stop
     }
     catch
     {
