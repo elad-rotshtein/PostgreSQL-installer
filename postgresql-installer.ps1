@@ -22,13 +22,14 @@ function Install-PostgreSQL
         [string]$Uri          = 'https://sbp.enterprisedb.com/getfile.jsp?fileid=1257713',  
         [string]$destination  = "$($env:USERPROFILE)\Desktop\PostgreSQL_Installer.exe",
         [string]$superaccount = 'postgres',
+        [boolean]$noUi      = $true,
         [Parameter(mandatory)][string]$pwdPath,
         [Parameter(mandatory)][string]$keyPath
     )
     
     try
     {
-    Invoke-WebRequest -Uri $Uri -OutFile $destination -ErrorAction stop
+    #Invoke-WebRequest -Uri $Uri -OutFile $destination -ErrorAction stop
     }
     catch
     {
@@ -45,7 +46,8 @@ function Install-PostgreSQL
     }
     try
     {
-       Start-Process $destination -ArgumentList "--mode unattended", "--superaccount $superaccount", "--superpassword $superpassword", "--servicepassword $superpassword" -Wait -ErrorAction Stop
+       Start-Process $destination -ArgumentList (@("--mode unattended", "--superaccount $superaccount", "--superpassword $superpassword", "--servicepassword $superpassword")`
+       + @("--unattendedmodeui none") * $noUi) -Wait -ErrorAction Stop
     }
     catch
     {
@@ -63,7 +65,7 @@ try
 {
     try
     {
-        Install-PostgreSQL -superaccount 'aidocapp' -pwdPath $pwdPath -keyPath $keyPath
+        Install-PostgreSQL -superaccount 'aidocapp' -pwdPath $pwdPath -keyPath $keyPath -noUi $false
     }
     catch
     {
