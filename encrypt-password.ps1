@@ -7,21 +7,22 @@
 # save your key and encrypted password only to folders with highly restricted access permissions!!!
 $keyDir = 'C:\encrypted_data'
 $keyFileName = 'key.txt'
-$PWDDir = $keyDir 
-$PWDFileName = 'crypt.txt'
+$pwdDir = $keyDir 
+$pwdFileName = 'crypt.txt'
 
 $keyPath = "$($keyDir + '\' + $keyFileName)"
-$PWDPath = "$($PWDDir + '\' + $PWDFileName)"
+$pwdPath = "$($pwdDir + '\' + $pwdFileName)"
 
-$PWDFileSuccess = $true
+$pwdFileSuccess = $true
 
+foreach ($dir in @($keyDir, $pwdDir)){
+    if (!(Test-Path $dir)) {
+        New-Item -ItemType Directory -Path $dir
+        write-host "Created folder at path $dir"
+    }
+}
 try
 {
-    if (!(Test-Path $keyDir)) {
-        New-Item -ItemType Directory -Path $keyDir
-        write-host "Created folder at path $keyDir"
-    }
-
     $newKey = New-Object Byte[] 32
     [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($newKey)
 
@@ -42,26 +43,26 @@ finally
 }
 
 # prompt user for password, convert the secure string to an encrypted standard string with with the new key and store it in a file
-$PWD = (Get-Credential -Message "Enter the password you wish to encrypt" -UserName "password only").Password | ConvertFrom-SecureString -key (get-content $keyPath)
-$PWD | Out-File $PWDPath
+$pwd = (Get-Credential -Message "Enter the password you wish to encrypt" -UserName "password only").Password | ConvertFrom-SecureString -key (get-content $keyPath)
+$pwd | Out-File $pwdPath
 
 # confrim creation of the password-containing file
-if (!(Get-Content $PWDPath) -eq $PWD) {
-    $PWDFileSuccess = $false
+if (!(Get-Content $pwdPath) -eq $pwd) {
+    $pwdFileSuccess = $false
 }
 
 # confirm the password-containing file can be decrypted
 try
 {
-    Get-Content $PWDPath | ConvertTo-SecureString -Key (get-content $keyPath) -ErrorAction stop | Out-Null
+    Get-Content $pwdPath | ConvertTo-SecureString -Key (get-content $keyPath) -ErrorAction stop | Out-Null
 }
 catch
 {
     $message = $_
     Write-Warning "error recieved while attempting to decrypt password file: $message"
-    $PWDFileSuccess = $false
+    $pwdFileSuccess = $false
 }
 
-if ($PWDFileSuccess) {
-    Write-Host -ForegroundColor Green "password file created successfully at $PWDPath"
+if ($pwdFileSuccess) {
+    Write-Host -ForegroundColor Green "password file created successfully at $pwdPath"
 }
