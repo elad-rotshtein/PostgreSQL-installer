@@ -4,7 +4,10 @@
 #
 ######################################################
 
-# path of key and encrypted password files
+$pgVer     = "13" # as expressed in the directory of an installed copy and the service name. most often floored.
+$pgBinPath = "$($env:ProgramFiles)\PostgreSQL\$($pgVer)\bin"
+
+# provide the path for the key and encrypted password files
 $keyPath = 'C:\encrypted_data\key.txt'
 $pwdPath = 'C:\encrypted_data\crypt.txt'
 
@@ -29,11 +32,11 @@ function Install-PostgreSQL
     
     try
     {
-    #Invoke-WebRequest -Uri $Uri -OutFile $destination -ErrorAction stop
+        Invoke-WebRequest -Uri $Uri -OutFile $destination -ErrorAction stop
     }
     catch
     {
-    throw "Error received while attempting to download installer from $uri. Error: $($error[0])"
+        throw "Error received while attempting to download installer from $uri. Error: $($error[0])"
     }
 
     try
@@ -42,7 +45,7 @@ function Install-PostgreSQL
     }
     catch
     {
-    throw "Error received while attempting to get and decrypt the password from $pwdPath with key from $keyPath. Error: $($error[0])"
+        throw "Error received while attempting to get and decrypt the password from $pwdPath with key from $keyPath. Error: $($error[0])"
     }
     try
     {
@@ -53,14 +56,13 @@ function Install-PostgreSQL
     }
     catch
     {
-    throw "Error received while attempting to run the installer. Error: $($error[0])"
+        throw "Error received while attempting to run the installer executable. Error: $($error[0])"
     }
 }
 
 
-
-
 # main
+
 Start-Transcript -path $transcript
 
 try
@@ -71,8 +73,19 @@ try
     }
     catch
     {
-    throw "Error received while using Install-PostgreSQL. Error: $($error[0])"
+        throw "Error received while using Install-PostgreSQL. Error: $($error[0])"
     }
+
+    if ((Get-Service -Name "postgresql*$pgVer").Status -eq 'Running')
+    {
+        Write-Host "PostgreSQL service is up and running!" -ForegroundColor Green
+    }
+    else
+    {
+        #hmm
+    }
+
+        
 }
 finally
 {

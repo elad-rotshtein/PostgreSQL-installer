@@ -4,7 +4,7 @@
 #                                       
 ##########################################
 
-# save your key and encrypted password only to folders with highly restricted access permissions!!!
+# save your key and encrypted password files to seprate, *secure* locations!
 $keyDir = 'C:\encrypted_data'
 $keyFileName = 'key.txt'
 $pwdDir = $keyDir 
@@ -13,7 +13,6 @@ $pwdFileName = 'crypt.txt'
 $keyPath = "$($keyDir + '\' + $keyFileName)"
 $pwdPath = "$($pwdDir + '\' + $pwdFileName)"
 
-$pwdFileSuccess = $true
 
 foreach ($dir in @($keyDir, $pwdDir)){
     if (!(Test-Path $dir)) {
@@ -46,7 +45,8 @@ finally
 $pwd = (Get-Credential -Message "Enter the password you wish to encrypt" -UserName "password only").Password | ConvertFrom-SecureString -key (get-content $keyPath)
 $pwd | Out-File $pwdPath
 
-# confrim creation of the password-containing file
+# confrim the creation of the password-containing file
+$pwdFileSuccess = $true
 if (!(Get-Content $pwdPath) -eq $pwd) {
     $pwdFileSuccess = $false
 }
@@ -59,7 +59,7 @@ try
 catch
 {
     $message = $_
-    Write-Warning "error recieved while attempting to decrypt password file: $message"
+    Write-Warning "Error recieved while attempting to decrypt password file: $message"
     $pwdFileSuccess = $false
 }
 
