@@ -1,10 +1,12 @@
-﻿###################################################### 
+﻿####################################################################################### 
 #
 # PostgreSQL-InstallerConfigurator
 # 
-# must run as administrator
+# ~must run with local administrator privileges or under an appropriate UAC policy~
 #
-######################################################
+# ~use encrypt-password.ps1 first to create the encrypted password file and key file~
+#
+#######################################################################################
 
 
 # provide the path for the key and encrypted password files
@@ -23,18 +25,18 @@ function Install-PostgreSQL
 {
     
     <#
-    add comment
+    Downloads the PostgreSQL installer from the provided URL and performs an unattended installation according to the parameters below. 
     #>
     
     [CmdletBinding()]
 
     param (
-        [string]$Uri          = 'https://sbp.enterprisedb.com/getfile.jsp?fileid=1257713',  
-        [string]$destination  = "$($env:USERPROFILE)\Desktop\PostgreSQL_Installer.exe", # where to save the installer exe
-        [string]$superaccount = 'postgres',
-        [boolean]$noUi        = $true,
-        [Parameter(mandatory)][string]$pwdPath,
-        [Parameter(mandatory)][string]$keyPath
+        [string]$Uri          = 'https://sbp.enterprisedb.com/getfile.jsp?fileid=1257713', # URL for an installer download
+        [string]$destination  = "$($env:USERPROFILE)\Desktop\PostgreSQL_Installer.exe", # where to save the installer executable
+        [string]$superaccount = 'postgres', # name for the superuser account
+        [boolean]$noUi        = $true, # choose $true to disable the unattended UI and $false allow it to display
+        [Parameter(mandatory)][string]$pwdPath, # path for the encrypted password file. this password will be used for the superuser to be created
+        [Parameter(mandatory)][string]$keyPath # path for the key to decrypt the encrypted password stirng with
     )
     
     
