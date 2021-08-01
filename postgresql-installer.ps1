@@ -1,34 +1,42 @@
 ﻿###################################################### 
 #
 # PostgreSQL-InstallerConfigurator
+# 
+# must run as administrator
 #
 ######################################################
 
-$pgVer     = "13" # as expressed in the directory of an installed copy and the service name. most often floored.
-$pgBinPath = "$($env:ProgramFiles)\PostgreSQL\$($pgVer)\bin"
 
 # provide the path for the key and encrypted password files
 $keyPath = 'C:\encrypted_data\key.txt'
 $pwdPath = 'C:\encrypted_data\crypt.txt'
 
-$transcript = "PostgreSQL-Installer.log"
+$pgVer     = "13" # as expressed in the directory of an installed copy and the service name. most often floored.
+$pgPath = "$($env:ProgramFiles)\PostgreSQL\$pgVer"
+
+$databaseName = 'aidocapp'
+$transcript = "$($env:USERPROFILE)\Desktop\PostgreSQL-Installer.$(Get-Date -Format 'dd.mm.yy')og"
 
 # function defenition
 
 function Install-PostgreSQL
 {
-    [CmdletBinding()]
+    
     <#
     add comment
     #>
+    
+    [CmdletBinding()]
+
     param (
         [string]$Uri          = 'https://sbp.enterprisedb.com/getfile.jsp?fileid=1257713',  
-        [string]$destination  = "$($env:USERPROFILE)\Desktop\PostgreSQL_Installer.exe",
+        [string]$destination  = "$($env:USERPROFILE)\Desktop\PostgreSQL_Installer.exe", # where to save the installer exe
         [string]$superaccount = 'postgres',
         [boolean]$noUi        = $true,
         [Parameter(mandatory)][string]$pwdPath,
         [Parameter(mandatory)][string]$keyPath
     )
+    
     
     try
     {
@@ -39,6 +47,7 @@ function Install-PostgreSQL
         throw "Error received while attempting to download installer from $uri. Error: $($error[0])"
     }
 
+    
     try
     {
         $superpassword = Get-Content $pwdPath | ConvertTo-SecureString -Key (get-content $keyPath)
@@ -47,6 +56,8 @@ function Install-PostgreSQL
     {
         throw "Error received while attempting to get and decrypt the password from $pwdPath with key from $keyPath. Error: $($error[0])"
     }
+    
+    
     try
     {
         Start-Process $destination -ArgumentList (@("--mode unattended", "--superaccount $superaccount",` 
@@ -61,9 +72,13 @@ function Install-PostgreSQL
 }
 
 
+
+
 # main
 
+
 Start-Transcript -path $transcript
+
 
 try
 {
@@ -76,18 +91,61 @@ try
         throw "Error received while using Install-PostgreSQL. Error: $($error[0])"
     }
 
-    if ((Get-Service -Name "postgresql*$pgVer").Status -eq 'Running')
+
+
+    $serviceStatus = (Get-Service -Name "postgresql*$pgVer" -ErrorAction Stop ).Status 
+    
+
+    if ($serviceStatus -eq 'Running')
     {
-        Write-Host "PostgreSQL service is up and running!" -ForegroundColor Green
+        
+        
+        Write-Host "PostgreSQL service is up and running! ( :" -ForegroundColor Green
+
+
+        try
+        {
+            $pgHba = "$($pgpath)\data\pg_hba"
+            Copy-Item -Path "$($pgHba).conf" -Destination "$($pgHba)_backup.conf"
+            (Get-Content "$($pgHba).conf" ) -replace '(host\s+all\s+all\s+)((127.0.0.1/32\s+)|(::1/128\s+))\w.+$', '$1$2trust' | Out-File -FilePath "$($pgHba).conf" -Encoding ASCII
+        }
+        catch
+        {
+            throw "Error received while attempting to backup and edit $($pgHba).conf. Stopping without creating database $($databaseName). Error: $($error[0])"
+        }
+
+
+        try
+        {
+            & "$($pgPath)\bin\createdb.exe" -w -h 127.0.0.1 -U aidocapp $databaseName
+        }
+        catch
+        {
+            throw "Error received while attempting to create database named $databaseName. Error: $($error[0])"
+
+        }
+
+
+        if ((& "$($pgPath)\bin\psql.exe" -w -h 127.0.0.1 -U aidocapp -c "\l") -match 'aidocapp\s+\|\s+aidocapp')
+        {
+            Write-Host "Database aidocapp successfully created!" -ForegroundColor Green
+        }
+
+
+    }
+    elseif ($serviceStatus)
+    {
+        Write-Warning "The PostgreSQL service exists but isn't running. It's: $($ServiceStatus). Stopping without creating database $databaseName"
     }
     else
     {
-        #hmm
+        Write-Warning "Couldn't find a service who's name matches postgresql*$($pgVer). Stopping without creating database $databaseName"
     }
-
-        
+    
+     
 }
 finally
 {
+    Copy-Item -Path "$($pgHba)_backup.conf" -Destination "$($pgHba).conf"
     Stop-Transcript
 }
