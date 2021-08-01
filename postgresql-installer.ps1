@@ -103,6 +103,7 @@ try
         Write-Host "PostgreSQL service is up and running! ( :" -ForegroundColor Green
 
 
+        # backing up and editing pg_hba.conf to allow local passwordless connections. reverting to back up at the end of the script.
         try
         {
             $pgHba = "$($pgpath)\data\pg_hba"
@@ -115,6 +116,7 @@ try
         }
 
 
+        # creating new database
         try
         {
             & "$($pgPath)\bin\createdb.exe" -w -h 127.0.0.1 -U aidocapp $databaseName
@@ -128,7 +130,7 @@ try
 
         if ((& "$($pgPath)\bin\psql.exe" -w -h 127.0.0.1 -U aidocapp -c "\l") -match 'aidocapp\s+\|\s+aidocapp')
         {
-            Write-Host "Database aidocapp successfully created!" -ForegroundColor Green
+            Write-Host "Database $databaseName successfully created!" -ForegroundColor Green 
         }
 
 
