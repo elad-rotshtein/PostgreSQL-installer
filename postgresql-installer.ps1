@@ -10,7 +10,7 @@
 # with a specified superuser name. the superuser password is taken and decrypted from a file
 # containing the password as an encrypted string. later, passwordless local connections
 # to the database server are temporarily allowed to create a database with a sepcified
-# name
+# name.
 #
 #######################################################################################
 
