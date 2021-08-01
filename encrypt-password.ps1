@@ -1,7 +1,10 @@
 ﻿##########################################
 #                                       
 # Encrypt-Password                                                                                
-#                                       
+# 
+# receives a password and creates a file containing the password as an 
+# encrypted string and another file containig the 256-bit AES key. 
+#
 ##########################################
 
 # save your key and encrypted password files to seprate, *secure* locations!
