@@ -69,6 +69,7 @@ function Install-PostgreSQL
     try
     {
         Start-Process $destination -ArgumentList (@("--mode unattended", "--superaccount $superaccount",` 
+        # convert the secure string holding the password to a standard, non encrypted string to enter to the superuser and service password parameters
         "--superpassword $([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($superpassword)))",`
         "--servicepassword $([System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($superpassword)))")`
         + @("--unattendedmodeui none") * $noUi) -Wait -ErrorAction Stop
