@@ -6,6 +6,12 @@
 #
 # ~use encrypt-password.ps1 first to create the encrypted password file and key file~
 #
+# defines a function to download and perform an unattended installation of postgresql
+# with a specified superuser name. the superuser password is taken and decrypted from a file
+# containing the password as an encrypted string. later, passwordless local connections
+# to the database server are temporarily allowed to create a database with a sepcified
+# name
+#
 #######################################################################################
 
 
